@@ -1,19 +1,25 @@
 const canvas = document.getElementById('canvas');
 const gl = canvas.getContext('webgl2');
+const speedControl = document.getElementById('speed');
+const infoBox = document.getElementById('info');
 
 if (!gl) alert("WebGL 2.0 isn't available");
 
 const sunPosition = [0, 0];
 const planetPositions = [
-    { name: 'Mercury', radius: 0.02, orbitRadius: 0.2, speed: 0.01, color: [0.7, 0.7, 0.7, 1.0] },
-    { name: 'Venus', radius: 0.03, orbitRadius: 0.35, speed: 0.008, color: [1.0, 0.9, 0.0, 1.0] },
-    { name: 'Earth', radius: 0.04, orbitRadius: 0.5, speed: 0.006, color: [0.0, 0.5, 1.0, 1.0] },
-    { name: 'Mars', radius: 0.03, orbitRadius: 0.65, speed: 0.005, color: [1.0, 0.3, 0.3, 1.0] }
+    { name: 'Mercury', radius: 0.02, orbitRadius: 0.2, speed: 0.67, color: [0.7, 0.7, 0.7, 1.0] },
+    { name: 'Venus', radius: 0.03, orbitRadius: 0.35, speed: 0.465, color: [1.0, 0.9, 0.0, 1.0] },
+    { name: 'Earth', radius: 0.04, orbitRadius: 0.5, speed: 0.365, color: [0.0, 0.5, 1.0, 1.0] },
+    { name: 'Mars', radius: 0.03, orbitRadius: 0.65, speed: 0.287, color: [1.0, 0.3, 0.3, 1.0] }
 ];
 
-let time = 0;  
+let time = 0;
 let zoom = 1.0;
-let projectionMatrixLoc; 
+let projectionMatrixLoc;
+let overallSpeed = parseFloat(speedControl.value);  // Initial speed from slider
+
+
+canvas.addEventListener('mousemove', handleMouseMove);
 
 function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -36,36 +42,88 @@ function drawPlanet(planet, angle) {
     const x = Math.cos(angle) * planet.orbitRadius;
     const y = Math.sin(angle) * planet.orbitRadius;
 
-    const planetPosition = new Float32Array([x, y]);
-    gl.bufferData(gl.ARRAY_BUFFER, planetPosition, gl.STATIC_DRAW);
+    // Create a list of vertices for the circle
+    const numSegments = 30; // Increase this for a smoother circle
+    const circleVertices = [];
+    const radius = planet.radius;
 
+    // Center of the circle (planet position)
+    circleVertices.push(x, y);  // Circle center
+
+    for (let i = 0; i <= numSegments; i++) {
+        const theta = (i / numSegments) * 2 * Math.PI;
+        const circleX = x + Math.cos(theta) * radius;
+        const circleY = y + Math.sin(theta) * radius;
+        circleVertices.push(circleX, circleY);
+    }
+
+    // Convert the vertices array to a Float32Array
+    const verticesArray = new Float32Array(circleVertices);
+
+    // Bind and load the vertex data into the buffer
+    gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
+
+    // Set the planet color
     const colorLocation = gl.getUniformLocation(gl.getParameter(gl.CURRENT_PROGRAM), 'u_Color');
     gl.uniform4fv(colorLocation, new Float32Array(planet.color));
 
-    gl.drawArrays(gl.POINTS, 0, 1);
+    // Draw the circle using a triangle fan
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments + 2);
+
+    return { x, y };
 }
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    const aspect = canvas.width / canvas.height;
+
+    // Adjust the projection matrix to maintain the correct aspect ratio
     const projectionMatrix = [
-        zoom, 0, 0, 0,
+        zoom / aspect, 0, 0, 0,
         0, zoom, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1,
     ];
     gl.uniformMatrix4fv(projectionMatrixLoc, false, new Float32Array(projectionMatrix));
 
-    drawPlanet({ orbitRadius: 0, color: [1.0, 1.0, 0.0, 1.0] }, 0); 
+    drawPlanet({ orbitRadius: 0, radius: 0.05, color: [1.0, 1.0, 0.0, 1.0] }, 0);
 
     planetPositions.forEach((planet) => {
-        const angle = time * planet.speed * 100;
-        drawPlanet(planet, angle);
+        const angle = time * planet.speed ;
+        planet.currentPosition = drawPlanet(planet, angle);
     });
 
-    time += 0.01;
+    time += 0.01 * overallSpeed;
     requestAnimationFrame(render);
 }
+
+function handleMouseMove(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
+    const y = ((rect.top - event.clientY) / canvas.height) * 2 + 1; 
+    // console.log(x, y);
+    
+    let hovered = false;
+    planetPositions.forEach(planet => {
+        const dist = Math.hypot(x - planet.currentPosition.x, y - planet.currentPosition.y);
+        console.log(dist, planet.radius * 2);
+        
+        if (dist < planet.radius * 2) {
+            hovered = true;
+            infoBox.style.display = 'block';
+            infoBox.style.left = `${event.clientX + 10}px`;
+            infoBox.style.top = `${event.clientY + 10}px`;
+            infoBox.textContent = planet.name;
+        }
+    });
+
+    if (!hovered) infoBox.style.display = 'none';
+}
+
+speedControl.addEventListener('input', (event) => {
+    overallSpeed = parseFloat(event.target.value);
+});
 
 init();
 render();
