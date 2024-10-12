@@ -16,7 +16,7 @@ const planetPositions = [
 let time = 0;
 let zoom = 1.0;
 let projectionMatrixLoc;
-let overallSpeed = parseFloat(speedControl.value);  // Initial speed from slider
+let overallSpeed = parseFloat(speedControl.value);  
 
 
 canvas.addEventListener('mousemove', handleMouseMove);
@@ -42,13 +42,11 @@ function drawPlanet(planet, angle) {
     const x = Math.cos(angle) * planet.orbitRadius;
     const y = Math.sin(angle) * planet.orbitRadius;
 
-    // Create a list of vertices for the circle
-    const numSegments = 30; // Increase this for a smoother circle
+    const numSegments = 30; 
     const circleVertices = [];
     const radius = planet.radius;
 
-    // Center of the circle (planet position)
-    circleVertices.push(x, y);  // Circle center
+    circleVertices.push(x, y);  
 
     for (let i = 0; i <= numSegments; i++) {
         const theta = (i / numSegments) * 2 * Math.PI;
@@ -56,18 +54,15 @@ function drawPlanet(planet, angle) {
         const circleY = y + Math.sin(theta) * radius;
         circleVertices.push(circleX, circleY);
     }
-
-    // Convert the vertices array to a Float32Array
+    
     const verticesArray = new Float32Array(circleVertices);
-
-    // Bind and load the vertex data into the buffer
+    
     gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
 
-    // Set the planet color
     const colorLocation = gl.getUniformLocation(gl.getParameter(gl.CURRENT_PROGRAM), 'u_Color');
     gl.uniform4fv(colorLocation, new Float32Array(planet.color));
 
-    // Draw the circle using a triangle fan
+    
     gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments + 2);
 
     return { x, y };
@@ -78,7 +73,6 @@ function render() {
 
     const aspect = canvas.width / canvas.height;
 
-    // Adjust the projection matrix to maintain the correct aspect ratio
     const projectionMatrix = [
         zoom / aspect, 0, 0, 0,
         0, zoom, 0, 0,
@@ -102,7 +96,6 @@ function handleMouseMove(event) {
     const rect = canvas.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
     const y = ((rect.top - event.clientY) / canvas.height) * 2 + 1; 
-    // console.log(x, y);
     
     let hovered = false;
     planetPositions.forEach(planet => {
