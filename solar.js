@@ -24,7 +24,7 @@ canvas.addEventListener('mousemove', handleMouseMove);
 function init() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-
+    console.log(canvas.width, canvas.height);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0, 0, 0, 1);
 
@@ -103,7 +103,7 @@ function handleMouseMove(event) {
     const mouseX = event.clientX - rect.left; 
     const mouseY = event.clientY - rect.top;
 
-    const x = ((mouseX / canvas.width) * 2 - 1) * 4 / 3;
+    const x = ((mouseX / canvas.width) * 2 - 1) * (canvas.width/ canvas.height);
     const y = (mouseY / canvas.height) * -2 + 1;
 
     let hovered = false;
@@ -117,7 +117,7 @@ function handleMouseMove(event) {
         
         console.log(`Checking ${planet.name}: position=(${planet.currentPosition.x.toFixed(2)}, ${planet.currentPosition.y.toFixed(2)}), distance=${dist.toFixed(2)}, planet radius=${planet.radius * 2}`);
 
-        if (x >= planet.currentPosition.x - planet.radius && x <= planet.currentPosition.x + planet.radius && y >= planet.currentPosition.y - planet.radius && y <= planet.currentPosition.y + planet.radius) {
+        if (dist < planet.radius * 2) {
             hovered = true;
             infoBox.style.display = 'block';
             infoBox.style.left = `${event.clientX + 10}px`;
@@ -154,8 +154,8 @@ speedControl.addEventListener('input', (event) => {
 });
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
