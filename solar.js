@@ -17,6 +17,7 @@ let time = 0;
 let zoom = 1.0;
 let projectionMatrixLoc;
 let overallSpeed = parseFloat(speedControl.value);  
+let overallSpeedTmp = parseFloat(speedControl.value); ;
 
 canvas.addEventListener('mousemove', handleMouseMove);
 
@@ -102,8 +103,8 @@ function handleMouseMove(event) {
     const mouseX = event.clientX - rect.left; 
     const mouseY = event.clientY - rect.top;
 
-    const x = (mouseX / canvas.width) * 2 - 1; 
-    const y = (mouseY / canvas.height) * -2 + 1; 
+    const x = ((mouseX / canvas.width) * 2 - 1) * 4 / 3;
+    const y = (mouseY / canvas.height) * -2 + 1;
 
     let hovered = false;
     
@@ -116,7 +117,7 @@ function handleMouseMove(event) {
         
         console.log(`Checking ${planet.name}: position=(${planet.currentPosition.x.toFixed(2)}, ${planet.currentPosition.y.toFixed(2)}), distance=${dist.toFixed(2)}, planet radius=${planet.radius * 2}`);
 
-        if (dist < planet.radius * 2) {
+        if (x >= planet.currentPosition.x - planet.radius && x <= planet.currentPosition.x + planet.radius && y >= planet.currentPosition.y - planet.radius && y <= planet.currentPosition.y + planet.radius) {
             hovered = true;
             infoBox.style.display = 'block';
             infoBox.style.left = `${event.clientX + 10}px`;
@@ -130,6 +131,17 @@ function handleMouseMove(event) {
     }
 }
 
+function pause() {
+    overallSpeedTmp = overallSpeed;
+    overallSpeed = 0;
+    speedControl.value = 0;
+}
+
+
+function resume() {
+    overallSpeed = overallSpeedTmp;
+    speedControl.value = overallSpeed;
+}
 
 speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
