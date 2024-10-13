@@ -132,6 +132,9 @@ function handleMouseMove(event) {
 }
 
 function pause() {
+    if (overallSpeed === 0) {
+        return
+    }
     overallSpeedTmp = overallSpeed;
     overallSpeed = 0;
     speedControl.value = 0;
@@ -139,6 +142,9 @@ function pause() {
 
 
 function resume() {
+    if (overallSpeed !== 0) {
+        return
+    }
     overallSpeed = overallSpeedTmp;
     speedControl.value = overallSpeed;
 }
