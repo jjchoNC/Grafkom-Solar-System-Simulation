@@ -18,10 +18,12 @@ let zoom = 1.0;
 let projectionMatrixLoc;
 let overallSpeed = parseFloat(speedControl.value);  
 
-
 canvas.addEventListener('mousemove', handleMouseMove);
 
 function init() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0, 0, 0, 1);
 
@@ -39,21 +41,23 @@ function init() {
 }
 
 function drawPlanet(planet, angle) {
-    const x = Math.cos(angle) * planet.orbitRadius;
-    const y = Math.sin(angle) * planet.orbitRadius;
+    const x = Math.cos(angle) * planet.orbitRadius; 
+    const y = Math.sin(angle) * planet.orbitRadius; 
 
-    const numSegments = 30; 
+    const canvasX = x; 
+    const canvasY = -y; 
+
+    const numSegments = 100; 
     const circleVertices = [];
     const radius = planet.radius;
-
-    circleVertices.push(x, y);  
+    circleVertices.push(canvasX, canvasY);  
 
     for (let i = 0; i <= numSegments; i++) {
         const theta = (i / numSegments) * 2 * Math.PI;
-        const circleX = x + Math.cos(theta) * radius;
-        const circleY = y + Math.sin(theta) * radius;
+        const circleX = canvasX + Math.cos(theta) * radius;
+        const circleY = canvasY + Math.sin(theta) * radius;
         circleVertices.push(circleX, circleY);
-    }
+    } 
     
     const verticesArray = new Float32Array(circleVertices);
     
@@ -62,10 +66,9 @@ function drawPlanet(planet, angle) {
     const colorLocation = gl.getUniformLocation(gl.getParameter(gl.CURRENT_PROGRAM), 'u_Color');
     gl.uniform4fv(colorLocation, new Float32Array(planet.color));
 
-    
     gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments + 2);
 
-    return { x, y };
+    return { x: canvasX, y: canvasY }; 
 }
 
 function render() {
@@ -82,10 +85,11 @@ function render() {
     gl.uniformMatrix4fv(projectionMatrixLoc, false, new Float32Array(projectionMatrix));
 
     drawPlanet({ orbitRadius: 0, radius: 0.05, color: [1.0, 1.0, 0.0, 1.0] }, 0);
-
+    
     planetPositions.forEach((planet) => {
-        const angle = time * planet.speed ;
-        planet.currentPosition = drawPlanet(planet, angle);
+        const angle = time * planet.speed;
+        const position = drawPlanet(planet, angle);
+        planet.currentPosition = { x: position.x, y: position.y };  
     });
 
     time += 0.01 * overallSpeed;
@@ -94,14 +98,24 @@ function render() {
 
 function handleMouseMove(event) {
     const rect = canvas.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
-    const y = ((rect.top - event.clientY) / canvas.height) * 2 + 1; 
     
+    const mouseX = event.clientX - rect.left; 
+    const mouseY = event.clientY - rect.top;
+
+    const x = (mouseX / canvas.width) * 2 - 1; 
+    const y = (mouseY / canvas.height) * -2 + 1; 
+
     let hovered = false;
+    
+    console.log(`Normalized Mouse coordinates: (${x.toFixed(2)}, ${y.toFixed(2)})`);
+
     planetPositions.forEach(planet => {
-        const dist = Math.hypot(x - planet.currentPosition.x, y - planet.currentPosition.y);
-        console.log(dist, planet.radius * 2);
         
+        const dist = Math.hypot(x - planet.currentPosition.x, y - planet.currentPosition.y);
+
+        
+        console.log(`Checking ${planet.name}: position=(${planet.currentPosition.x.toFixed(2)}, ${planet.currentPosition.y.toFixed(2)}), distance=${dist.toFixed(2)}, planet radius=${planet.radius * 2}`);
+
         if (dist < planet.radius * 2) {
             hovered = true;
             infoBox.style.display = 'block';
@@ -111,12 +125,25 @@ function handleMouseMove(event) {
         }
     });
 
-    if (!hovered) infoBox.style.display = 'none';
+    if (!hovered) {
+        infoBox.style.display = 'none';
+    }
 }
+
 
 speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
 });
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
 init();
 render();
