@@ -5,8 +5,8 @@ const infoBox = document.getElementById('info');
 
 if (!gl) alert("WebGL 2.0 isn't available");
 
-const sunPosition = [0, 0];
 const planetPositions = [
+    { name: 'Sun', radius: 0.05, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
     { name: 'Mercury', radius: 0.02, orbitRadius: 0.2, speed: 0.67, color: [0.7, 0.7, 0.7, 1.0] },
     { name: 'Venus', radius: 0.03, orbitRadius: 0.35, speed: 0.465, color: [1.0, 0.9, 0.0, 1.0] },
     { name: 'Earth', radius: 0.04, orbitRadius: 0.5, speed: 0.365, color: [0.0, 0.5, 1.0, 1.0] },
@@ -18,8 +18,6 @@ let zoom = 1.0;
 let projectionMatrixLoc;
 let overallSpeed = parseFloat(speedControl.value);  
 let overallSpeedTmp = parseFloat(speedControl.value); ;
-
-canvas.addEventListener('mousemove', handleMouseMove);
 
 function init() {
     canvas.width = canvas.clientWidth;
@@ -84,8 +82,6 @@ function render() {
         0, 0, 0, 1,
     ];
     gl.uniformMatrix4fv(projectionMatrixLoc, false, new Float32Array(projectionMatrix));
-
-    drawPlanet({ orbitRadius: 0, radius: 0.05, color: [1.0, 1.0, 0.0, 1.0] }, 0);
     
     planetPositions.forEach((planet) => {
         const angle = time * planet.speed;
@@ -149,19 +145,17 @@ function resume() {
     speedControl.value = overallSpeed;
 }
 
-speedControl.addEventListener('input', (event) => {
-    overallSpeed = parseFloat(event.target.value);
-});
-
 function resizeCanvas() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
-
-resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+canvas.addEventListener('mousemove', handleMouseMove);
+speedControl.addEventListener('input', (event) => {
+    overallSpeed = parseFloat(event.target.value);
+});
 
 init();
 render();
