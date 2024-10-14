@@ -221,6 +221,19 @@ function pause() {
     speedControl.value = 0;
 }
 
+function reset() {
+    overallSpeed = 1;
+    speedControl.value = 1;
+    overallSpeedTmp = 1;    
+    orbitAngle = 0;
+    cameraX = 0;
+    cameraY = 0;
+    zoom = 1;
+    document.getElementById('camera-slider').value = 0;
+    document.getElementById('camera-sliderY').value = 0;
+    document.getElementById('zoom-slider').value = 1;
+}
+
 
 function resume() {
     if (overallSpeed !== 0) {
