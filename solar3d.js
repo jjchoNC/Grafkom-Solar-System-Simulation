@@ -35,10 +35,10 @@ let overallSpeed = parseFloat(speedControl.value);
 
 const solarPlanet = [
     { name: 'Sun', radius: 0.05, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
-    { name: 'Mercury', radius: 0.02, orbitRadius: 0.2, speed: 0.57, color: [0.7, 0.7, 0.7, 1.0] },
-    { name: 'Venus', radius: 0.03, orbitRadius: 0.35, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
-    { name: 'Earth', radius: 0.04, orbitRadius: 0.5, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
-    { name: 'Mars', radius: 0.03, orbitRadius: 0.65, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] }
+    { name: 'Mercury', radius: 0.02, orbitRadius: 0.1, speed: 0.57, color: [0.7, 0.7, 0.7, 1.0] },
+    { name: 'Venus', radius: 0.03, orbitRadius: 0.2, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
+    { name: 'Earth', radius: 0.04, orbitRadius: 0.25, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
+    { name: 'Mars', radius: 0.03, orbitRadius: 0.3, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] }
 ];
 
 var cameraX = 0;  // Initial X-axis position for the camera
@@ -174,8 +174,8 @@ function render() {
 
     solarPlanet.forEach((planet) => {
         const angle = orbitAngle * planet.speed;
-        const x = Math.cos(angle) * (planet.orbitRadius + planet.radius);
-        const z = Math.sin(angle) * (planet.orbitRadius + planet.radius);
+        const x = Math.cos(angle) * (planet.orbitRadius);
+        const z = Math.sin(angle) * (planet.orbitRadius);
 
         var planetModelViewMatrix = mult(modelViewMatrix, translate(x, 0.0, z));
         planetModelViewMatrix = mult(planetModelViewMatrix, scale(planet.radius, planet.radius, planet.radius));
