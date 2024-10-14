@@ -24,6 +24,7 @@ var theta = vec3(0, 0, 0);
 var thetaLoc;
 var flag = false;
 var axis = 0;
+var zoom = 1.0;
 
 var orbitAngle = 0.0;
 
@@ -161,9 +162,9 @@ function updateLighting() {
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+
     var aspect = canvas.width / canvas.height;
-    const projectionMatrix = ortho(-0.25 * aspect, 0.25 * aspect, -0.25, 0.25, -100, 100);
+    var projectionMatrix = ortho(-0.25 * aspect * (1/zoom), 0.25 * aspect * (1/zoom), -0.25 * (1/zoom), 0.25 * (1/zoom), -100, 100);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uProjectionMatrix"), false, flatten(projectionMatrix));
     var modelViewMatrix = lookAt(vec3(cameraX, cameraY, 1.0), at, up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
@@ -193,6 +194,10 @@ document.getElementById('camera-slider').addEventListener('input', (event) => {
 
 document.getElementById('camera-sliderY').addEventListener('input', (event) => {
     cameraY = parseFloat(event.target.value);
+});
+
+document.getElementById('zoom-slider').addEventListener('input', (event) => {
+    zoom = parseFloat(event.target.value);
 });
 
 function pause() {
