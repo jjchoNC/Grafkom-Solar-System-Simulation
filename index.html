@@ -49,6 +49,25 @@
             transform: scale(1.1);
             background-color: #2980b9;
         }
+
+        /* Styling for the About Button */
+        .btn-about {
+            background-color: #2ecc71;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-about:hover {
+            transform: scale(1.1);
+            background-color: #27ae60;
+        }
     </style>
     <script>
         function redirectTo2D() {
@@ -58,10 +77,17 @@
         function redirectTo3D() {
             window.location.href = "ThreeDimension/solar3d.html";
         }
+
+        function redirectToAbout() {
+            window.location.href = "about/about.html";
+        }
     </script>
 </head>
 
 <body>
+    <!-- About Button in top-right corner -->
+    <button class="btn-about" onclick="redirectToAbout()">About</button>
+
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100">
         <div class="content text-center col-12 col-md-8 col-lg-6">
             <h1>Explore the Solar System</h1>

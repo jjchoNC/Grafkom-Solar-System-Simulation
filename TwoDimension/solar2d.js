@@ -40,6 +40,19 @@ function init() {
     projectionMatrixLoc = gl.getUniformLocation(program, 'u_ProjectionMatrix');
 }
 
+function addPlanet(name, radius, orbitRadius, speed, color) {
+    const newPlanet = {
+        name: name,
+        radius: radius,
+        orbitRadius: orbitRadius,
+        speed: speed,
+        color: color,
+        currentPosition: { x: 0, y: 0 }  // Initial position
+    };
+
+    planetPositions.push(newPlanet);
+}
+
 function drawPlanet(planet, angle) {
     const x = Math.cos(angle) * planet.orbitRadius;
     const y = Math.sin(angle) * planet.orbitRadius;

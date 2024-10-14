@@ -30,18 +30,7 @@
             background-color: rgba(0, 0, 0, 0.7);
         }
 
-        /* Container for controls */
-        .controls {
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-        }
-
         /* Styling buttons and sliders */
-        input[type=range] {
-            width: 150px;
-        }
-
         button {
             background-color: #3498db;
             color: white;
@@ -63,11 +52,10 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 200px;
+            width: 220px;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
             padding: 20px;
-            color: white;
             z-index: 100;
         }
 
@@ -77,7 +65,7 @@
         }
 
         .nav-left ul li {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .nav-left ul li a {
@@ -88,12 +76,11 @@
         }
 
         .nav-left ul li a:hover {
-            text-decoration: underline;
+            color: #3498db;
         }
 
-        /* Back to Main Menu Button */
-        .main-menu-btn {
-            margin-top: 20px;
+        h4 {
+            font-weight: 700;
         }
     </style>
 </head>
@@ -101,37 +88,77 @@
 <body class="d-flex flex-column justify-content-between">
     <!-- Left-side Navigation Menu -->
     <nav class="nav-left">
-        <h4>Solar System Menu</h4>
-        <ul>
-            <li><a href="../index.html">Home</a></li>
-            <li><a href="../TwoDimension/solar2d.html">Explore in 2D</a></li>
-            <li><a href="../ThreeDimension/solar3d.html">Explore in 3D</a></li>
+        <h4 class="text-white mb-4">Solar System Menu</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="../index.html">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="../TwoDimension/solar2d.html">Explore in 2D</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="../ThreeDimension/solar3d.html">Explore in 3D</a>
+            </li>
         </ul>
     </nav>
 
-    <!-- Canvas for rendering -->
-    <div style="margin-left: 220px;">
+    <!-- Main Content Area -->
+    <div style="margin-left: 240px;">
         <canvas id="canvas"></canvas>
+
+        <!-- Add Planet Button -->
+        <div class="container mt-4 text-center">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlanetModal">
+                Add Planet
+            </button>
+        </div>
+
+        <!-- Bootstrap Modal for Add Planet Form -->
+        <div class="modal fade" id="addPlanetModal" tabindex="-1" aria-labelledby="addPlanetModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPlanetModalLabel">Add New Planet</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="planetForm">
+                            <div class="mb-3">
+                                <label for="planetName" class="form-label">Planet Name:</label>
+                                <input type="text" id="planetName" class="form-control" placeholder="Enter planet name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="planetRadius" class="form-label">Radius:</label>
+                                <input type="number" id="planetRadius" class="form-control" placeholder="Enter planet radius" step="0.01" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="planetOrbitRadius" class="form-label">Orbit Radius:</label>
+                                <input type="number" id="planetOrbitRadius" class="form-control" placeholder="Enter orbit radius" step="0.1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="planetSpeed" class="form-label">Speed:</label>
+                                <input type="number" id="planetSpeed" class="form-control" placeholder="Enter planet speed" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Add Planet</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Controls for interaction -->
         <div class="container mt-4" id="controls">
-            <div class="controls row text-center justify-content-center py-3">
+            <div class="controls row text-center justify-content-center py-3 bg-dark text-white rounded">
                 <!-- Planet Speed Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="speed">Planet Speed:</label>
+                    <label for="speed" class="form-label">Planet Speed:</label>
                     <input type="range" id="speed" name="speed" min="1" max="5" step="0.4" value="1" class="form-range">
                 </div>
 
                 <!-- Zoom Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="zoom">Zoom:</label>
+                    <label for="zoom" class="form-label">Zoom:</label>
                     <input type="range" id="zoom" name="zoom" min="0.5" max="1.5" step="0.1" value="1" class="form-range">
-                </div>
-
-                <!-- Gravity Control Slider -->
-                <div class="col-sm-4 mb-3">
-                    <label for="gravity">Gravity:</label>
-                    <input type="range" id="gravity" name="gravity" min="0" max="10" step="0.5" value="5" class="form-range">
                 </div>
 
                 <!-- Play/Pause Buttons -->
@@ -139,11 +166,6 @@
                     <button id="pause" onclick="pause();" class="btn btn-primary me-2">Pause</button>
                     <button id="play" onclick="resume();" class="btn btn-success">Play</button>
                 </div>
-            </div>
-
-            <!-- Button to go back to Main Menu -->
-            <div class="main-menu-btn text-center">
-                <button onclick="redirectToMainMenu()" class="btn btn-danger">Back to Main Menu</button>
             </div>
         </div>
     </div>
@@ -176,10 +198,37 @@
     <script src="../js/initShaders.js"></script>
     <script src="../TwoDimension/solar2d.js"></script>
 
-    <!-- Redirect functions -->
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        function redirectToMainMenu() {
-            window.location.href = "index.html";
+        document.getElementById('planetForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get input values
+            const name = document.getElementById('planetName').value;
+            const radius = parseFloat(document.getElementById('planetRadius').value);
+            const orbitRadius = parseFloat(document.getElementById('planetOrbitRadius').value);
+            const speed = parseFloat(document.getElementById('planetSpeed').value);
+            const color = getRandomColor();  // Use random color
+
+            // Call addPlanet function
+            addPlanet(name, radius, orbitRadius, speed, color);
+            
+            // Close modal after adding planet
+            const addPlanetModal = new bootstrap.Modal(document.getElementById('addPlanetModal'));
+            addPlanetModal.hide();
+
+            // Reset form
+            event.target.reset();
+        });
+
+        // Function to generate random color [r, g, b, a]
+        function getRandomColor() {
+            const r = Math.random();
+            const g = Math.random();
+            const b = Math.random();
+            return [r, g, b, 1.0];  // Return random [r, g, b, 1.0] array
         }
     </script>
 </body>

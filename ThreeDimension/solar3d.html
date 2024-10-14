@@ -7,16 +7,19 @@
     <title>Solar System 3D</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
-            background-color: black;
+            background-image: url('https://www.nasa.gov/sites/default/files/thumbnails/image/edu_what_is_the_solar_system.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
         }
 
-        /* Canvas Styling */
         #gl-canvas {
             width: 100%;
             height: 75vh;
@@ -24,16 +27,14 @@
             background-color: rgba(0, 0, 0, 0.7);
         }
 
-        /* Left Navigation Styling */
         .nav-left {
             position: fixed;
             top: 0;
             left: 0;
-            width: 200px;
+            width: 220px;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
             padding: 20px;
-            color: white;
             z-index: 100;
         }
 
@@ -43,7 +44,7 @@
         }
 
         .nav-left ul li {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .nav-left ul li a {
@@ -51,22 +52,15 @@
             text-decoration: none;
             font-size: 18px;
             font-weight: bold;
+            transition: color 0.3s;
         }
 
         .nav-left ul li a:hover {
-            text-decoration: underline;
+            color: #3498db;
         }
 
-        /* Control Panel Styling */
-        .controls {
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-        }
-
-        input[type=range] {
-            width: 150px;
+        h4 {
+            font-weight: 700;
         }
 
         button {
@@ -85,71 +79,107 @@
             background-color: #2980b9;
         }
 
-        /* Main content adjustment */
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            background: #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+
         .main-content {
-            margin-left: 220px;
+            margin-left: 240px;
+        }
+
+        .controls {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <!-- Left-side Navigation Menu -->
     <nav class="nav-left">
-        <h4>Solar System Menu</h4>
-        <ul>
-            <li><a href="../index.html">Home</a></li>
-            <li><a href="../TwoDimension/solar2d.html">Explore in 2D</a></li>
-            <li><a href="../ThreeDimension/solar3d.html">Explore in 3D</a></li>
+        <h4 class="text-white mb-4">Solar System Menu</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-white" href="../index.html">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="../TwoDimension/solar2d.html">Explore in 2D</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white" href="../ThreeDimension/solar3d.html">Explore in 3D</a>
+            </li>
         </ul>
     </nav>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <!-- Canvas for rendering -->
+        
         <canvas id="gl-canvas"></canvas>
 
-        <!-- Controls for interaction -->
         <div class="container mt-4" id="controls">
-            <div class="controls row text-center justify-content-center py-3">
+            <div class="controls row text-center justify-content-center py-3 bg-dark text-white rounded">
+
                 <!-- Planet Speed Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="speed">Planet Speed:</label>
+                    <label for="speed" class="form-label">Planet Speed:</label>
                     <input type="range" id="speed" name="speed" min="1" max="5" step="0.2" value="1" class="form-range">
                 </div>
 
                 <!-- Zoom Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="zoom-slider">Zoom:</label>
+                    <label for="zoom-slider" class="form-label">Zoom:</label>
                     <input type="range" id="zoom-slider" min="1" max="2" step="0.001" value="1" class="form-range">
                 </div>
 
                 <!-- Camera-X Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="camera-sliderX">Camera-X:</label>
+                    <label for="camera-sliderX" class="form-label">Camera-X:</label>
                     <input type="range" id="camera-sliderX" min="-2" max="2" step="0.01" value="0" class="form-range">
                 </div>
 
                 <!-- Camera-Y Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="camera-sliderY">Camera-Y:</label>
+                    <label for="camera-sliderY" class="form-label">Camera-Y:</label>
                     <input type="range" id="camera-sliderY" min="-0.5" max="0.5" step="0.01" value="0.25" class="form-range">
                 </div>
 
                 <!-- Light-X Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="light-sliderX">Light-X:</label>
+                    <label for="light-sliderX" class="form-label">Light-X:</label>
                     <input type="range" id="light-sliderX" min="0" max="1" step="0.1" value="0.1" class="form-range">
                 </div>
 
                 <!-- Light-Y Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="light-sliderY">Light-Y:</label>
+                    <label for="light-sliderY" class="form-label">Light-Y:</label>
                     <input type="range" id="light-sliderY" min="0" max="1" step="0.1" value="0.1" class="form-range">
                 </div>
 
                 <!-- Light-Z Slider -->
                 <div class="col-sm-4 mb-3">
-                    <label for="light-sliderZ">Light-Z:</label>
+                    <label for="light-sliderZ" class="form-label">Light-Z:</label>
                     <input type="range" id="light-sliderZ" min="0" max="1" step="0.1" value="0.1" class="form-range">
                 </div>
 
@@ -182,11 +212,6 @@
                         <button type="submit" class="btn btn-info">Add Planet</button>
                     </form>
                 </div>
-            </div>
-
-            <!-- Button to go to 2D Page -->
-            <div class="text-center mt-4">
-                <button onclick="redirectTo2D()" class="btn btn-danger">Go to 2D Page</button>
             </div>
         </div>
     </div>
