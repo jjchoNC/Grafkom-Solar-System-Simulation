@@ -65,8 +65,10 @@
         <script id="vertex-shader" type="x-shader/x-vertex">
             #version 300 es
 
-            in  vec4 aPosition;
+            in  vec4 aPlanetPos;
+            in  vec4 aOrbitPos;
             in  vec3 aNormal;
+            uniform  float uDrawOrbit;
             out vec4 vColor;
 
             uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
@@ -76,7 +78,15 @@
             uniform float uShininess;
 
             void main() {
-                vec3 pos = -(uModelViewMatrix * aPosition).xyz;
+                vec4 position;
+                if (uDrawOrbit == 1.0) {
+                    position = aOrbitPos;
+                    gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+                    return;
+                } else {
+                    position = aPlanetPos;
+                }
+                vec3 pos = -(uModelViewMatrix * position).xyz;
                 vec3 light = uLightPosition.xyz;
                 vec3 L = normalize(light - pos);
                 vec3 E = normalize(-pos);
@@ -95,7 +105,7 @@
                     specular = vec4(0.0, 0.0, 0.0, 1.0);
                 }
 
-                gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+                gl_Position = uProjectionMatrix * uModelViewMatrix * position;
                 vColor = ambient + diffuse + specular;
                 vColor.a = 1.0;
             }

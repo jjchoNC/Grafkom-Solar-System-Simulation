@@ -40,7 +40,7 @@ const solarPlanet = [
     { name: 'Venus', radius: 0.03, orbitRadius: 0.175, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
     { name: 'Earth', radius: 0.04, orbitRadius: 0.25, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
     { name: 'Mars', radius: 0.03, orbitRadius: 0.32, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] },
-    
+
 ];
 
 var devicePixelRatio = window.devicePixelRatio || 1;
@@ -60,7 +60,7 @@ function init() {
 
 
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0.0, 0.0, 0.1, 1.0); 
+    gl.clearColor(0.0, 0.0, 0.1, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
     program = initShaders(gl, "vertex-shader", "fragment-shader");
@@ -68,35 +68,19 @@ function init() {
 
     createSphere(3, 0.75);
 
+    thetaLoc = gl.getUniformLocation(program, "theta");
+
     var nBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
     var normalLoc = gl.getAttribLocation(program, "aNormal");
     gl.vertexAttribPointer(normalLoc, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(normalLoc);
-
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(positionsArray), gl.STATIC_DRAW);
-    var positionLoc = gl.getAttribLocation(program, "aPosition");
-    gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionLoc);
-
-    thetaLoc = gl.getUniformLocation(program, "theta");
-
-    // var aspect = canvas.width / canvas.height;
-    // projectionMatrix = ortho(-0.25 * aspect, 0.25 * aspect, -0.25, 0.25, -100, 100);
-    
-    // document.getElementById("ButtonX").onclick = function () { axis = 0; };
-    // document.getElementById("ButtonY").onclick = function () { axis = 1; };
-    // document.getElementById("ButtonZ").onclick = function () { axis = 2; };
-    // document.getElementById("ButtonT").onclick = function () { flag = !flag; };
 }
-
 
 function createSphere(subdivisions, radius) {
     const t = (1 + Math.sqrt(5)) / 2;
-    
+
     const vertices = [
         vec3(-1, t, 0), vec3(1, t, 0), vec3(-1, -t, 0), vec3(1, -t, 0),
         vec3(0, -1, t), vec3(0, 1, t), vec3(0, -1, -t), vec3(0, 1, -t),
@@ -164,11 +148,32 @@ function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     var aspect = canvas.width / canvas.height;
-    var projectionMatrix = ortho(-0.25 * aspect * (1/zoom), 0.25 * aspect * (1/zoom), -0.25 * (1/zoom), 0.25 * (1/zoom), -100, 100);
+    var projectionMatrix = ortho(-0.25 * aspect * (1 / zoom), 0.25 * aspect * (1 / zoom), -0.25 * (1 / zoom), 0.25 * (1 / zoom), -100, 100);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uProjectionMatrix"), false, flatten(projectionMatrix));
     var modelViewMatrix = lookAt(vec3(cameraX, cameraY, 1.0), at, up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
 
+    // draw path
+    solarPlanet.forEach((planet) => {
+        var orbitVertices = [];
+        for (let i = 0; i < 360; i++) {
+            const x = Math.cos(i * Math.PI / 180) * planet.orbitRadius;
+            const z = Math.sin(i * Math.PI / 180) * planet.orbitRadius;
+            orbitVertices.push(vec4(x, 0.0, z, 1.0));
+        }
+        var orbitBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, orbitBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(orbitVertices), gl.STATIC_DRAW);
+        var orbitPositionLoc = gl.getAttribLocation(program, "aOrbitPos");
+        gl.vertexAttribPointer(orbitPositionLoc, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(orbitPositionLoc);
+
+        gl.uniform4fv(gl.getUniformLocation(program, "uMaterialColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
+        gl.uniform1f(gl.getUniformLocation(program, "uDrawOrbit"), 1.0);
+        gl.drawArrays(gl.LINE_LOOP, 0, orbitVertices.length);
+    });
+
+    // draw planets
     solarPlanet.forEach((planet) => {
         const angle = orbitAngle * planet.speed;
         const x = Math.cos(angle) * (planet.orbitRadius);
@@ -180,10 +185,17 @@ function render() {
         gl.uniform4fv(gl.getUniformLocation(program, "uMaterialColor"), flatten(vec4(planet.color)));
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(planetModelViewMatrix));
 
+        var vBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(positionsArray), gl.STATIC_DRAW);
+        var positionLoc = gl.getAttribLocation(program, "aPlanetPos");
+        gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(positionLoc);
+
+        gl.uniform1f(gl.getUniformLocation(program, "uDrawOrbit"), 0.0);
         gl.drawArrays(gl.TRIANGLES, 0, positionsArray.length);
     });
-    // console.log(overallSpeed);
-    
+
     orbitAngle += 0.01 * overallSpeed;
     requestAnimationFrame(render);
 }
@@ -230,9 +242,9 @@ speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
 });
 
-document.getElementById('planet-form').addEventListener('submit', function(event) {
+document.getElementById('planet-form').addEventListener('submit', function (event) {
     event.preventDefault();
-    
+
     const planetName = document.getElementById('planet-name').value;
     const planetRadius = parseFloat(document.getElementById('planet-radius').value);
     const orbitRadius = parseFloat(document.getElementById('planet-orbit-radius').value);
@@ -263,7 +275,7 @@ document.getElementById('planet-form').addEventListener('submit', function(event
         radius: planetRadius,
         orbitRadius: orbitRadius,
         speed: planetSpeed,
-        color: [Math.random(), Math.random(), Math.random(), 1.0] 
+        color: [Math.random(), Math.random(), Math.random(), 1.0]
     });
 
     document.getElementById('planet-form').reset();
