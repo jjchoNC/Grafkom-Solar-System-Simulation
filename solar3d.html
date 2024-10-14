@@ -1,151 +1,269 @@
-    <!DOCTYPE html>
-    <html>
+<!DOCTYPE html>
+<html lang="en">
 
-    <body>
-        <style>
-            canvas {
-                width: 100vw;
-                height: 75vh;
-                display: block;
-                
-            }
-        </style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System 3D</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: black;
+        }
+
+        /* Canvas Styling */
+        #gl-canvas {
+            width: 100%;
+            height: 75vh;
+            display: block;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Left Navigation Styling */
+        .nav-left {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            color: white;
+            z-index: 100;
+        }
+
+        .nav-left ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .nav-left ul li {
+            margin-bottom: 20px;
+        }
+
+        .nav-left ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .nav-left ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Control Panel Styling */
+        .controls {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        input[type=range] {
+            width: 150px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background-color: #2980b9;
+        }
+
+        /* Main content adjustment */
+        .main-content {
+            margin-left: 220px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Left-side Navigation Menu -->
+    <nav class="nav-left">
+        <h4>Solar System Menu</h4>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="solar2d.html">Explore in 2D</a></li>
+            <li><a href="solar3d.html">Explore in 3D</a></li>
+            <li><a href="#controls">Controls</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Canvas for rendering -->
         <canvas id="gl-canvas"></canvas>
 
-        <!-- <button id="ButtonX">Rotate X</button>
-        <button id="ButtonY">Rotate Y</button>
-        <button id="ButtonZ">Rotate Z</button>
-        <button id="ButtonT">Toggle Rotation</button> -->
-        <br>
+        <!-- Controls for interaction -->
+        <div class="container mt-4" id="controls">
+            <div class="controls row text-center justify-content-center py-3">
+                <!-- Planet Speed Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="speed">Planet Speed:</label>
+                    <input type="range" id="speed" name="speed" min="1" max="5" step="0.2" value="1" class="form-range">
+                </div>
 
-    
-        <label for="speed">Planet Speed:</label>
-        <input type="range" id="speed" name="speed" min="1" max="5" step="0.2" value="1">
-        
-        <p>Zoom</p>
-        <input type="range" id="zoom-slider" min="1" max="2" step="0.001" value="1">
+                <!-- Zoom Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="zoom-slider">Zoom:</label>
+                    <input type="range" id="zoom-slider" min="1" max="2" step="0.001" value="1" class="form-range">
+                </div>
 
-        <p>Camera-X</p>
-        <input type="range" id="camera-sliderX" min="-2" max="2" step="0.01" value="0">
+                <!-- Camera-X Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="camera-sliderX">Camera-X:</label>
+                    <input type="range" id="camera-sliderX" min="-2" max="2" step="0.01" value="0" class="form-range">
+                </div>
 
-        <p>Camera-Y</p>
-        <input type="range" id="camera-sliderY" min="-0.5" max="0.5" step="0.01" value="0.25">
+                <!-- Camera-Y Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="camera-sliderY">Camera-Y:</label>
+                    <input type="range" id="camera-sliderY" min="-0.5" max="0.5" step="0.01" value="0.25" class="form-range">
+                </div>
 
-        <p>Light-X</p>
-        <input type="range" id="light-sliderX" min="0" max="1" step="0.1" value="0.1">
+                <!-- Light-X Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="light-sliderX">Light-X:</label>
+                    <input type="range" id="light-sliderX" min="0" max="1" step="0.1" value="0.1" class="form-range">
+                </div>
 
-        <p>Light-Y</p>
-        <input type="range" id="light-sliderY" min="0" max="1" step="0.1" value="0.1">
+                <!-- Light-Y Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="light-sliderY">Light-Y:</label>
+                    <input type="range" id="light-sliderY" min="0" max="1" step="0.1" value="0.1" class="form-range">
+                </div>
 
-        <p>Light-Z</p>
-        <input type="range" id="light-sliderZ" min="0" max="1" step="0.1" value="0.1">
+                <!-- Light-Z Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="light-sliderZ">Light-Z:</label>
+                    <input type="range" id="light-sliderZ" min="0" max="1" step="0.1" value="0.1" class="form-range">
+                </div>
 
-        <br>
-        <input id="pause" type="button" value="Pause" onclick="pause();" />
+                <!-- Play/Pause Buttons -->
+                <div class="col-sm-4 mb-3">
+                    <button id="pause" onclick="pause();" class="btn btn-primary me-2">Pause</button>
+                    <button id="play" onclick="resume();" class="btn btn-success">Play</button>
+                    <button id="reset" onclick="reset();" class="btn btn-warning">Reset</button>
+                </div>
 
-        <input id="play" type="button" value="Play" onclick="resume();" />
+                <!-- Planet Addition Form -->
+                <div class="col-sm-12">
+                    <form id="planet-form" class="mt-3">
+                        <div class="mb-3">
+                            <label for="planet-name" class="form-label">Planet Name:</label>
+                            <input type="text" id="planet-name" name="planet-name" required class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="planet-radius" class="form-label">Planet Radius:</label>
+                            <input type="number" id="planet-radius" name="planet-radius" step="0.01" min="0.01" required class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="planet-orbit-radius" class="form-label">Orbit Radius:</label>
+                            <input type="number" id="planet-orbit-radius" name="planet-orbit-radius" step="0.01" min="0.01" required class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="planet-speed" class="form-label">Planet Speed:</label>
+                            <input type="number" id="planet-speed" name="planet-speed" step="0.01" min="0.01" required class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-info">Add Planet</button>
+                    </form>
+                </div>
+            </div>
 
-        <input id="reset" type="button" value="Reset" onclick="reset();" />
+            <!-- Button to go to 2D Page -->
+            <div class="text-center mt-4">
+                <button onclick="redirectTo2D()" class="btn btn-danger">Go to 2D Page</button>
+            </div>
+        </div>
+    </div>
 
-        <br>
-        <br>
+    <!-- Vertex and Fragment Shaders -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        #version 300 es
+        in vec4 aPlanetPos;
+        in vec4 aOrbitPos;
+        in vec3 aNormal;
+        uniform float uDrawOrbit;
+        out vec4 vColor;
 
-        <form id="planet-form">
-            <label for="planet-name">Planet Name:</label>
-            <input type="text" id="planet-name" name="planet-name" required>
-            <br>
-        
-            <label for="planet-radius">Planet Radius:</label>
-            <input type="number" id="planet-radius" name="planet-radius" step="0.01" min="0.01" required>
-            <br>
-        
-            <label for="planet-orbit-radius">Orbit Radius:</label>
-            <input type="number" id="planet-orbit-radius" name="planet-orbit-radius" step="0.01" min="0.01" required>
-            <br>
-        
-            <label for="planet-speed">Planet Speed:</label>
-            <input type="number" id="planet-speed" name="planet-speed" step="0.01" min="0.01" required>
-            <br>
-        
-            <button type="submit">Add Planet</button>
-        </form>
+        uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+        uniform vec4 uLightPosition;
+        uniform float uShininess;
 
-        <br>
-
-        <button onclick="redirectTo2D()">Go to 2D Page</button>
-
-        <script id="vertex-shader" type="x-shader/x-vertex">
-            #version 300 es
-
-            in  vec4 aPlanetPos;
-            in  vec4 aOrbitPos;
-            in  vec3 aNormal;
-            uniform  float uDrawOrbit;
-            out vec4 vColor;
-
-            uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
-            uniform mat4 uModelViewMatrix;
-            uniform mat4 uProjectionMatrix;
-            uniform vec4 uLightPosition;
-            uniform float uShininess;
-
-            void main() {
-                vec4 position;
-                if (uDrawOrbit == 1.0) {
-                    position = aOrbitPos;
-                    gl_Position = uProjectionMatrix * uModelViewMatrix * position;
-                    return;
-                } else {
-                    position = aPlanetPos;
-                }
-                vec3 pos = -(uModelViewMatrix * position).xyz;
-                vec3 light = uLightPosition.xyz;
-                vec3 L = normalize(light - pos);
-                vec3 E = normalize(-pos);
-                vec3 H = normalize(L + E);
-                vec4 NN = vec4(aNormal, 0);
-
-                vec3 N = normalize((uModelViewMatrix * NN).xyz);
-
-                vec4 ambient = uAmbientProduct;
-                float Kd = max(dot(L, N), 0.0);
-                vec4 diffuse = Kd * uDiffuseProduct;
-                float Ks = pow(max(dot(N, H), 0.0), uShininess);
-                vec4 specular = Ks * uSpecularProduct;
-
-                if (dot(L, N) < 0.0) {
-                    specular = vec4(0.0, 0.0, 0.0, 1.0);
-                }
-
+        void main() {
+            vec4 position;
+            if (uDrawOrbit == 1.0) {
+                position = aOrbitPos;
+                vColor = vec4(1.0, 1.0, 1.0, 1.0);
                 gl_Position = uProjectionMatrix * uModelViewMatrix * position;
-                vColor = ambient + diffuse + specular;
-                vColor.a = 1.0;
+                return;
+            } else {
+                position = aPlanetPos;
             }
-        </script>
+            vec3 pos = -(uModelViewMatrix * position).xyz;
+            vec3 light = uLightPosition.xyz;
+            vec3 L = normalize(light - pos);
+            vec3 E = normalize(-pos);
+            vec3 H = normalize(L + E);
+            vec4 NN = vec4(aNormal, 0);
 
-        <script id="fragment-shader" type="x-shader/x-fragment">
-            #version 300 es
+            vec3 N = normalize((uModelViewMatrix * NN).xyz);
 
-            precision mediump float;
+            vec4 ambient = uAmbientProduct;
+            float Kd = max(dot(L, N), 0.0);
+            vec4 diffuse = Kd * uDiffuseProduct;
+            float Ks = pow(max(dot(N, H), 0.0), uShininess);
+            vec4 specular = Ks * uSpecularProduct;
 
-            in vec4 vColor;
-            out vec4 fColor;
-            uniform vec4 uMaterialColor;
-            
-
-            void main() {
-                fColor = vColor * uMaterialColor;
+            if (dot(L, N) < 0.0) {
+                specular = vec4(0.0, 0.0, 0.0, 1.0);
             }
-        </script>
 
-        <script src="initShaders.js"></script>
-        <script src="MVnew.js"></script>
-        <script src="solar3d.js"></script>
-        <script>
-            function redirectTo2D() {
-                    window.location.href = "solar2d.html";
-                }
-        </script>
-    </body>
+            gl_Position = uProjectionMatrix * uModelViewMatrix * position;
+            vColor = ambient + diffuse + specular;
+            vColor.a = 1.0;
+        }
+    </script>
 
-    </html>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        #version 300 es
+        precision mediump float;
+
+        in vec4 vColor;
+        out vec4 fColor;
+        uniform vec4 uMaterialColor;
+
+        void main() {
+            fColor = vColor * uMaterialColor;
+        }
+    </script>
+
+    <!-- External libraries and scripts -->
+    <script src="initShaders.js"></script>
+    <script src="MVnew.js"></script>
+    <script src="solar3d.js"></script>
+    <script>
+        function redirectTo2D() {
+            window.location.href = "solar2d.html";
+        }
+    </script>
+</body>
+
+</html>
