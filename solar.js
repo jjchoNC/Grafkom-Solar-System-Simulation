@@ -1,6 +1,7 @@
 const canvas = document.getElementById('canvas');
 const gl = canvas.getContext('webgl2');
 const speedControl = document.getElementById('speed');
+const zoomControl = document.getElementById('zoom');
 const infoBox = document.getElementById('info');
 
 if (!gl) alert("WebGL 2.0 isn't available");
@@ -16,8 +17,8 @@ const planetPositions = [
 let time = 0;
 let zoom = 1.0;
 let projectionMatrixLoc;
-let overallSpeed = parseFloat(speedControl.value);  
-let overallSpeedTmp = parseFloat(speedControl.value); ;
+let overallSpeed = parseFloat(speedControl.value);
+let overallSpeedTmp = parseFloat(speedControl.value);;
 
 function init() {
     canvas.width = canvas.clientWidth;
@@ -40,26 +41,26 @@ function init() {
 }
 
 function drawPlanet(planet, angle) {
-    const x = Math.cos(angle) * planet.orbitRadius; 
-    const y = Math.sin(angle) * planet.orbitRadius; 
+    const x = Math.cos(angle) * planet.orbitRadius;
+    const y = Math.sin(angle) * planet.orbitRadius;
 
-    const canvasX = x; 
-    const canvasY = -y; 
+    const canvasX = x;
+    const canvasY = -y;
 
-    const numSegments = 100; 
+    const numSegments = 100;
     const circleVertices = [];
     const radius = planet.radius;
-    circleVertices.push(canvasX, canvasY);  
+    circleVertices.push(canvasX, canvasY);
 
     for (let i = 0; i <= numSegments; i++) {
         const theta = (i / numSegments) * 2 * Math.PI;
         const circleX = canvasX + Math.cos(theta) * radius;
         const circleY = canvasY + Math.sin(theta) * radius;
         circleVertices.push(circleX, circleY);
-    } 
-    
+    }
+
     const verticesArray = new Float32Array(circleVertices);
-    
+
     gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
 
     const colorLocation = gl.getUniformLocation(gl.getParameter(gl.CURRENT_PROGRAM), 'u_Color');
@@ -67,7 +68,7 @@ function drawPlanet(planet, angle) {
 
     gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments + 2);
 
-    return { x: canvasX, y: canvasY }; 
+    return { x: canvasX, y: canvasY };
 }
 
 function render() {
@@ -82,11 +83,11 @@ function render() {
         0, 0, 0, 1,
     ];
     gl.uniformMatrix4fv(projectionMatrixLoc, false, new Float32Array(projectionMatrix));
-    
+
     planetPositions.forEach((planet) => {
         const angle = time * planet.speed;
         const position = drawPlanet(planet, angle);
-        planet.currentPosition = { x: position.x, y: position.y };  
+        planet.currentPosition = { x: position.x, y: position.y };
     });
 
     time += 0.01 * overallSpeed;
@@ -95,22 +96,21 @@ function render() {
 
 function handleMouseMove(event) {
     const rect = canvas.getBoundingClientRect();
-    
-    const mouseX = event.clientX - rect.left; 
-    const mouseY = event.clientY - rect.top;
 
-    const x = ((mouseX / canvas.width) * 2 - 1) * (canvas.width/ canvas.height);
-    const y = (mouseY / canvas.height) * -2 + 1;
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    const x = ((mouseX / canvas.width) * 2 - 1) * (canvas.width / canvas.height) * (1 / zoom);
+    const y = ((mouseY / canvas.height) * -2 + 1) * (1 / zoom);
 
     let hovered = false;
-    
-    console.log(`Normalized Mouse coordinates: (${x.toFixed(2)}, ${y.toFixed(2)})`);
+
+    console.log(`Normalized Mouse coordinates: (${x.toFixed(2)}, ${y.toFixed(2)}, ${zoom})`);
 
     planetPositions.forEach(planet => {
-        
+
         const dist = Math.hypot(x - planet.currentPosition.x, y - planet.currentPosition.y);
 
-        
+
         console.log(`Checking ${planet.name}: position=(${planet.currentPosition.x.toFixed(2)}, ${planet.currentPosition.y.toFixed(2)}), distance=${dist.toFixed(2)}, planet radius=${planet.radius * 2}`);
 
         if (dist < planet.radius * 2) {
@@ -155,6 +155,10 @@ window.addEventListener('resize', resizeCanvas);
 canvas.addEventListener('mousemove', handleMouseMove);
 speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
+});
+
+zoomControl.addEventListener('input', (event) => {
+    zoom = parseFloat(event.target.value);
 });
 
 init();
