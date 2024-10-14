@@ -13,7 +13,7 @@ var specular = 0.5;
 
 var materialColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-var lightPosition = vec4(1.0, 1.0, 1.0, 0.0);
+var lightPosition = vec4(1.0, 1.0, 0.0, 1.0);
 var materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
 var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
 var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
@@ -45,7 +45,7 @@ const solarPlanet = [
 
 var devicePixelRatio = window.devicePixelRatio || 1;
 var cameraX = 0;  // Initial X-axis position for the camera
-var cameraY = 0;  // Initial Y-axis position for the camera
+var cameraY = 0.1;  // Initial Y-axis position for the camera
 var eye = vec3(cameraX, cameraY, 1.0);
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
@@ -129,6 +129,7 @@ function createSphere(subdivisions, radius) {
 }
 
 function updateLighting() {
+    console.log(lightPosition);
     var lightAmbient = vec4(ambient, 0.5, 0.5, 1.0);
     var lightDiffuse = vec4(diffuse, 1.0, 1.0, 1.0);
     var lightSpecular = vec4(specular, 1.0, 1.0, 1.0);
@@ -200,7 +201,7 @@ function render() {
     requestAnimationFrame(render);
 }
 
-document.getElementById('camera-slider').addEventListener('input', (event) => {
+document.getElementById('camera-sliderX').addEventListener('input', (event) => {
     cameraX = parseFloat(event.target.value);
 });
 
@@ -210,6 +211,21 @@ document.getElementById('camera-sliderY').addEventListener('input', (event) => {
 
 document.getElementById('zoom-slider').addEventListener('input', (event) => {
     zoom = parseFloat(event.target.value);
+});
+
+document.getElementById('light-sliderX').addEventListener('input', (event) => {
+    lightPosition[0] = parseFloat(event.target.value);
+    updateLighting();
+});
+
+document.getElementById('light-sliderY').addEventListener('input', (event) => {
+    lightPosition[1] = parseFloat(event.target.value);
+    updateLighting();
+});
+
+document.getElementById('light-sliderZ').addEventListener('input', (event) => {
+    lightPosition[2] = parseFloat(event.target.value);
+    updateLighting();
 });
 
 function pause() {
