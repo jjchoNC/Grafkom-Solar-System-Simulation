@@ -223,6 +223,52 @@ speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
 });
 
+document.getElementById('planet-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent form submission and page refresh
+    
+    // Retrieve values from form inputs
+    const planetName = document.getElementById('planet-name').value;
+    const planetRadius = parseFloat(document.getElementById('planet-radius').value);
+    const orbitRadius = parseFloat(document.getElementById('planet-orbit-radius').value);
+    const planetSpeed = parseFloat(document.getElementById('planet-speed').value);
+
+    // Validate the inputs (optional step, basic validation)
+    if (!planetName || isNaN(planetRadius) || isNaN(orbitRadius) || isNaN(planetSpeed)) {
+        alert("Please enter valid planet details.");
+        return;
+    }
+
+    let maxPlanetRadius = -1;
+    let indexMaxPlanetRadius = -1;
+
+    for (let i = 0; i < solarPlanet.length; i++) {
+        if (solarPlanet[i].radius > maxPlanetRadius) {
+            maxPlanetRadius = solarPlanet[i].radius;
+            indexMaxPlanetRadius = i;
+        }
+    }
+
+    if (planetRadius + orbitRadius < maxPlanetRadius + solarPlanet[indexMaxPlanetRadius].orbitRadius) {
+        alert("The new planet will collide with the existing planet. Please enter valid planet details.");
+        return;
+    }
+
+    // Append the new planet to the solarPlanet array
+    solarPlanet.push({
+        name: planetName,
+        radius: planetRadius,
+        orbitRadius: orbitRadius,
+        speed: planetSpeed,
+        color: [Math.random(), Math.random(), Math.random(), 1.0]  // Random color
+    });
+
+    // Clear the form inputs after submission
+    document.getElementById('planet-form').reset();
+
+    // Re-render the scene to include the new planet
+    render();
+});
+
 init();
 updateLighting();
 render();
