@@ -32,13 +32,15 @@ var orbitAngle = 0.0;
 const speedControl = document.getElementById('speed');
 
 let overallSpeed = parseFloat(speedControl.value);
+let overallSpeedTmp = parseFloat(speedControl.value);;
 
 const solarPlanet = [
-    { name: 'Sun', radius: 0.05, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
+    { name: 'Sun', radius: 0.06, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
     { name: 'Mercury', radius: 0.02, orbitRadius: 0.1, speed: 0.57, color: [0.7, 0.7, 0.7, 1.0] },
-    { name: 'Venus', radius: 0.03, orbitRadius: 0.2, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
+    { name: 'Venus', radius: 0.03, orbitRadius: 0.175, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
     { name: 'Earth', radius: 0.04, orbitRadius: 0.25, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
-    { name: 'Mars', radius: 0.03, orbitRadius: 0.3, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] }
+    { name: 'Mars', radius: 0.03, orbitRadius: 0.32, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] },
+    
 ];
 
 var cameraX = 0;  // Initial X-axis position for the camera
@@ -170,7 +172,7 @@ function render() {
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
 
     // Increment orbit angles
-    orbitAngle += 0.01 * overallSpeed;
+    
 
     solarPlanet.forEach((planet) => {
         const angle = orbitAngle * planet.speed;
@@ -185,7 +187,9 @@ function render() {
 
         gl.drawArrays(gl.TRIANGLES, 0, positionsArray.length);
     });
-
+    // console.log(overallSpeed);
+    
+    orbitAngle += 0.01 * overallSpeed;
     requestAnimationFrame(render);
 }
 
@@ -197,7 +201,23 @@ document.getElementById('camera-sliderY').addEventListener('input', (event) => {
     cameraY = parseFloat(event.target.value);
 });
 
+function pause() {
+    if (overallSpeed === 0) {
+        return
+    }
+    overallSpeedTmp = overallSpeed;
+    overallSpeed = 0;
+    speedControl.value = 0;
+}
 
+
+function resume() {
+    if (overallSpeed !== 0) {
+        return
+    }
+    overallSpeed = overallSpeedTmp;
+    speedControl.value = overallSpeed;
+}
 
 speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
