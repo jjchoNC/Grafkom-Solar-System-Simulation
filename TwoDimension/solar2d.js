@@ -88,6 +88,7 @@ function render() {
         const angle = time * planet.speed;
         const position = drawPlanet(planet, angle);
         planet.currentPosition = { x: position.x, y: position.y };
+        drawOrbit(planet.orbitRadius);
     });
 
     time += 0.01 * overallSpeed;
@@ -125,6 +126,27 @@ function handleMouseMove(event) {
     if (!hovered) {
         infoBox.style.display = 'none';
     }
+}
+
+function drawOrbit(orbitRadius) {
+    const numSegments = 100;
+    const orbitVertices = [];
+
+    for (let i = 0; i <= numSegments; i++) {
+        const theta = (i / numSegments) * 2 * Math.PI;
+        const x = Math.cos(theta) * orbitRadius;
+        const y = Math.sin(theta) * orbitRadius;
+        orbitVertices.push(x, y);
+    }
+
+    const verticesArray = new Float32Array(orbitVertices);
+    gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
+
+    // Set the color to white for the orbit
+    const colorLocation = gl.getUniformLocation(gl.getParameter(gl.CURRENT_PROGRAM), 'u_Color');
+    gl.uniform4fv(colorLocation, new Float32Array([1.0, 1.0, 1.0, 1.0]));  // White color
+
+    gl.drawArrays(gl.LINE_LOOP, 0, numSegments + 1);
 }
 
 function pause() {

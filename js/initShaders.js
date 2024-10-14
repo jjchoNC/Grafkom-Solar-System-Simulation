@@ -1,5 +1,5 @@
                                              //
-//  initShaders.js: contains the code to read, compile, and link the shaders.
+//  js/initShaders.js: contains the code to read, compile, and link the shaders.
 // Shaders are pro- grams that are compiled in the drivers. 
 //We create them as null-terminated strings of characters, usually with a standard text editor, which are eventually passed into WebGL. 
 
