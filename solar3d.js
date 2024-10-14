@@ -19,7 +19,6 @@ var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
 var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
 var materialShininess = 20.0;
 
-var projectionMatrix;
 var program;
 var theta = vec3(0, 0, 0);
 var thetaLoc;
@@ -43,6 +42,7 @@ const solarPlanet = [
     
 ];
 
+var devicePixelRatio = window.devicePixelRatio || 1;
 var cameraX = 0;  // Initial X-axis position for the camera
 var cameraY = 0;  // Initial Y-axis position for the camera
 var eye = vec3(cameraX, cameraY, 1.0);
@@ -54,10 +54,6 @@ function init() {
     gl = canvas.getContext('webgl2');
     if (!gl) alert("WebGL 2.0 isn't available");
 
-    // Get the device pixel ratio
-    var devicePixelRatio = window.devicePixelRatio || 1;
-
-    // Adjust the canvas size to match the device pixel ratio
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -69,7 +65,7 @@ function init() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    createSphere();
+    createSphere(3, 0.75);
 
     var nBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
@@ -87,8 +83,8 @@ function init() {
 
     thetaLoc = gl.getUniformLocation(program, "theta");
 
-    var aspect = canvas.width / canvas.height;
-    projectionMatrix = ortho(-0.25 * aspect, 0.25 * aspect, -0.25, 0.25, -100, 100);
+    // var aspect = canvas.width / canvas.height;
+    // projectionMatrix = ortho(-0.25 * aspect, 0.25 * aspect, -0.25, 0.25, -100, 100);
     
     // document.getElementById("ButtonX").onclick = function () { axis = 0; };
     // document.getElementById("ButtonY").onclick = function () { axis = 1; };
@@ -96,55 +92,55 @@ function init() {
     // document.getElementById("ButtonT").onclick = function () { flag = !flag; };
 }
 
-function createSphere() {
-    var latitudeBands = 100;
-    var longitudeBands = 100;
-    var radius = 0.5;
 
-    for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
-        var theta = latNumber * Math.PI / latitudeBands;
-        var sinTheta = Math.sin(theta);
-        var cosTheta = Math.cos(theta);
+function createSphere(subdivisions, radius) {
+    const t = (1 + Math.sqrt(5)) / 2;
+    
+    const vertices = [
+        vec3(-1, t, 0), vec3(1, t, 0), vec3(-1, -t, 0), vec3(1, -t, 0),
+        vec3(0, -1, t), vec3(0, 1, t), vec3(0, -1, -t), vec3(0, 1, -t),
+        vec3(t, 0, -1), vec3(t, 0, 1), vec3(-t, 0, -1), vec3(-t, 0, 1)
+    ];
 
-        for (var longNumber = 0; longNumber <= longitudeBands; longNumber++) {
-        var phi = longNumber * 2 * Math.PI / longitudeBands;
-        var sinPhi = Math.sin(phi);
-        var cosPhi = Math.cos(phi);
+    vertices.forEach((v, i) => {
+        vertices[i] = normalize(v);
+    });
 
-        var x = cosPhi * sinTheta;
-        var y = cosTheta;
-        var z = sinPhi * sinTheta;
-        var normal = vec3(x, y, z);
-        normalsArray.push(normal);
-        positionsArray.push(vec4(radius * x, radius * y, radius * z, 1.0));
+    const indices = [
+        [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11],
+        [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6], [7, 1, 8],
+        [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9],
+        [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]
+    ];
+    function subdivide(v1, v2, v3, depth) {
+        if (depth === 0) {
+            positionsArray.push(vec4(radius * v1[0], radius * v1[1], radius * v1[2], 1.0));
+            positionsArray.push(vec4(radius * v2[0], radius * v2[1], radius * v2[2], 1.0));
+            positionsArray.push(vec4(radius * v3[0], radius * v3[1], radius * v3[2], 1.0));
+
+            normalsArray.push(vec3(v1[0], v1[1], v1[2]));
+            normalsArray.push(vec3(v2[0], v2[1], v2[2]));
+            normalsArray.push(vec3(v3[0], v3[1], v3[2]));
+        } else {
+            let v12 = normalize(mix(v1, v2, 0.5));
+            let v23 = normalize(mix(v2, v3, 0.5));
+            let v31 = normalize(mix(v3, v1, 0.5));
+
+            subdivide(v1, v12, v31, depth - 1);
+            subdivide(v2, v23, v12, depth - 1);
+            subdivide(v3, v31, v23, depth - 1);
+            subdivide(v12, v23, v31, depth - 1);
         }
     }
 
-    // Generate indices for the sphere's triangle strips
-    for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
-        for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
-        var first = (latNumber * (longitudeBands + 1)) + longNumber;
-        var second = first + longitudeBands + 1;
+    indices.forEach(triangle => {
+        subdivide(vertices[triangle[0]], vertices[triangle[1]], vertices[triangle[2]], subdivisions);
+    });
 
-        positionsArray.push(positionsArray[first]);
-        normalsArray.push(normalsArray[first]);
-
-        positionsArray.push(positionsArray[second]);
-        normalsArray.push(normalsArray[second]);
-
-        positionsArray.push(positionsArray[first + 1]);
-        normalsArray.push(normalsArray[first + 1]);
-
-        positionsArray.push(positionsArray[second]);
-        normalsArray.push(normalsArray[second]);
-
-        positionsArray.push(positionsArray[second + 1]);
-        normalsArray.push(normalsArray[second + 1]);
-
-        positionsArray.push(positionsArray[first + 1]);
-        normalsArray.push(normalsArray[first + 1]);
-        }
-    }
+    return {
+        positionsArray: positionsArray,
+        normalsArray: normalsArray
+    };
 }
 
 function updateLighting() {
@@ -161,18 +157,16 @@ function updateLighting() {
     gl.uniform4fv(gl.getUniformLocation(program, "uSpecularProduct"), specularProduct);
     gl.uniform4fv(gl.getUniformLocation(program, "uLightPosition"), lightPosition);
     gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "uProjectionMatrix"), false, flatten(projectionMatrix));
 }
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    // Move camera based on the cameraX value
+    
+    var aspect = canvas.width / canvas.height;
+    const projectionMatrix = ortho(-0.25 * aspect, 0.25 * aspect, -0.25, 0.25, -100, 100);
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "uProjectionMatrix"), false, flatten(projectionMatrix));
     var modelViewMatrix = lookAt(vec3(cameraX, cameraY, 1.0), at, up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
-
-    // Increment orbit angles
-    
 
     solarPlanet.forEach((planet) => {
         const angle = orbitAngle * planet.speed;
@@ -219,20 +213,26 @@ function resume() {
     speedControl.value = overallSpeed;
 }
 
+function resizeCanvas() {
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+    console.log(canvas.width, canvas.height);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+window.addEventListener('resize', resizeCanvas);
 speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
 });
 
 document.getElementById('planet-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission and page refresh
+    event.preventDefault();
     
-    // Retrieve values from form inputs
     const planetName = document.getElementById('planet-name').value;
     const planetRadius = parseFloat(document.getElementById('planet-radius').value);
     const orbitRadius = parseFloat(document.getElementById('planet-orbit-radius').value);
     const planetSpeed = parseFloat(document.getElementById('planet-speed').value);
 
-    // Validate the inputs (optional step, basic validation)
     if (!planetName || isNaN(planetRadius) || isNaN(orbitRadius) || isNaN(planetSpeed)) {
         alert("Please enter valid planet details.");
         return;
@@ -253,19 +253,15 @@ document.getElementById('planet-form').addEventListener('submit', function(event
         return;
     }
 
-    // Append the new planet to the solarPlanet array
     solarPlanet.push({
         name: planetName,
         radius: planetRadius,
         orbitRadius: orbitRadius,
         speed: planetSpeed,
-        color: [Math.random(), Math.random(), Math.random(), 1.0]  // Random color
+        color: [Math.random(), Math.random(), Math.random(), 1.0] 
     });
 
-    // Clear the form inputs after submission
     document.getElementById('planet-form').reset();
-
-    // Re-render the scene to include the new planet
     render();
 });
 
