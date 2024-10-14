@@ -28,13 +28,24 @@ var axis = 0;
 
 var orbitAngle = 0.0;
 
+
+const speedControl = document.getElementById('speed');
+
+let overallSpeed = parseFloat(speedControl.value);
+
 const solarPlanet = [
     { name: 'Sun', radius: 0.05, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
-    { name: 'Mercury', radius: 0.02, orbitRadius: 0.2, speed: 0.67, color: [0.7, 0.7, 0.7, 1.0] },
-    { name: 'Venus', radius: 0.03, orbitRadius: 0.35, speed: 0.465, color: [1.0, 0.9, 0.0, 1.0] },
-    { name: 'Earth', radius: 0.04, orbitRadius: 0.5, speed: 0.365, color: [0.0, 0.5, 1.0, 1.0] },
-    { name: 'Mars', radius: 0.03, orbitRadius: 0.65, speed: 0.287, color: [1.0, 0.3, 0.3, 1.0] }
+    { name: 'Mercury', radius: 0.02, orbitRadius: 0.2, speed: 0.57, color: [0.7, 0.7, 0.7, 1.0] },
+    { name: 'Venus', radius: 0.03, orbitRadius: 0.35, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
+    { name: 'Earth', radius: 0.04, orbitRadius: 0.5, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
+    { name: 'Mars', radius: 0.03, orbitRadius: 0.65, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] }
 ];
+
+var cameraX = 0;  // Initial X-axis position for the camera
+var cameraY = 0;  // Initial Y-axis position for the camera
+var eye = vec3(cameraX, cameraY, 1.0);
+var at = vec3(0.0, 0.0, 0.0);
+var up = vec3(0.0, 1.0, 0.0);
 
 function init() {
     canvas = document.getElementById("gl-canvas");
@@ -50,7 +61,7 @@ function init() {
 
 
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.1, 1.0); 
     gl.enable(gl.DEPTH_TEST);
 
     program = initShaders(gl, "vertex-shader", "fragment-shader");
@@ -77,10 +88,10 @@ function init() {
     var aspect = canvas.width / canvas.height;
     projectionMatrix = ortho(-0.25 * aspect, 0.25 * aspect, -0.25, 0.25, -100, 100);
     
-    document.getElementById("ButtonX").onclick = function () { axis = 0; };
-    document.getElementById("ButtonY").onclick = function () { axis = 1; };
-    document.getElementById("ButtonZ").onclick = function () { axis = 2; };
-    document.getElementById("ButtonT").onclick = function () { flag = !flag; };
+    // document.getElementById("ButtonX").onclick = function () { axis = 0; };
+    // document.getElementById("ButtonY").onclick = function () { axis = 1; };
+    // document.getElementById("ButtonZ").onclick = function () { axis = 2; };
+    // document.getElementById("ButtonT").onclick = function () { flag = !flag; };
 }
 
 function createSphere() {
@@ -154,24 +165,43 @@ function updateLighting() {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Move camera based on the cameraX value
+    var modelViewMatrix = lookAt(vec3(cameraX, cameraY, 1.0), at, up);
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
+
     // Increment orbit angles
-    orbitAngle += 0.01;
+    orbitAngle += 0.01 * overallSpeed;
 
     solarPlanet.forEach((planet) => {
         const angle = orbitAngle * planet.speed;
         const x = Math.cos(angle) * (planet.orbitRadius + planet.radius);
         const z = Math.sin(angle) * (planet.orbitRadius + planet.radius);
 
-        var modelViewMatrix = mat4();
+        var planetModelViewMatrix = mult(modelViewMatrix, translate(x, 0.0, z));
+        planetModelViewMatrix = mult(planetModelViewMatrix, scale(planet.radius, planet.radius, planet.radius));
+
         gl.uniform4fv(gl.getUniformLocation(program, "uMaterialColor"), flatten(vec4(planet.color)));
-        modelViewMatrix = mult(modelViewMatrix, translate(x, 0.0, z));
-        modelViewMatrix = mult(modelViewMatrix, scale(planet.radius, planet.radius, planet.radius));
-        gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(planetModelViewMatrix));
+
         gl.drawArrays(gl.TRIANGLES, 0, positionsArray.length);
     });
 
     requestAnimationFrame(render);
 }
+
+document.getElementById('camera-slider').addEventListener('input', (event) => {
+    cameraX = parseFloat(event.target.value);
+});
+
+document.getElementById('camera-sliderY').addEventListener('input', (event) => {
+    cameraY = parseFloat(event.target.value);
+});
+
+
+
+speedControl.addEventListener('input', (event) => {
+    overallSpeed = parseFloat(event.target.value);
+});
 
 init();
 updateLighting();

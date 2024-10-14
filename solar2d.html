@@ -36,6 +36,11 @@
 
 <div id="info"></div>
 
+<br>
+<br>
+
+<button onclick="redirectTo3D()">Go to 3D Page</button>
+
 <script id="vertex-shader" type="x-shader/x-vertex">
 #version 300 es
 
@@ -64,6 +69,10 @@ void main() {
 <!-- <script src="MVnew.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
 <script src="solar2d.js"></script>
-
+<script>
+    function redirectTo3D() {
+            window.location.href = "solar3d.html";
+        }
+</script>
 </body>
 </html>
