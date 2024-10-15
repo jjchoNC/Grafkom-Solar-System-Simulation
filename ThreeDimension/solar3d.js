@@ -28,6 +28,22 @@ var zoom = 1.0;
 
 var orbitAngle = 0.0;
 
+var asteroidBelt = [];
+
+function createAsteroidBelt(numAsteroids) {
+    for (let i = 0; i < numAsteroids; i++) {
+        const orbitRadius = 0.4 + Math.random() * 0.15;  // Radius sabuk asteroid
+        const speed = 0.02 + Math.random() * 0.05;  // Kecepatan acak
+        const radius = 0.002 + Math.random() * 0.005;  // Ukuran kecil acak
+        const angleOffset = Math.random() * 360;  // Sudut acak awal dalam derajat
+        const orbitHeight = (Math.random() - 0.5) * 0.02;  // Ketinggian acak (+/- sedikit)
+        const color = [0.5 + Math.random() * 0.5, 0.5 + Math.random() * 0.5, 0.5 + Math.random() * 0.5, 1.0];  // Warna keabuan
+
+        asteroidBelt.push({ orbitRadius, speed, radius, angleOffset, orbitHeight, color });
+    }
+}
+
+createAsteroidBelt(200); 
 
 const speedControl = document.getElementById('speed');
 
@@ -197,6 +213,21 @@ function render() {
         gl.drawArrays(gl.TRIANGLES, 0, positionsArray.length);
     });
 
+    asteroidBelt.forEach((asteroid) => {
+        const angle = (orbitAngle * asteroid.speed) + asteroid.angleOffset;
+        const x = Math.cos(angle) * asteroid.orbitRadius;  // Math.cos() expects radian
+        const z = Math.sin(angle) * asteroid.orbitRadius;  // Math.sin() expects radian
+        const y = asteroid.orbitHeight;  // Ketinggian acak
+    
+        var asteroidModelViewMatrix = mult(modelViewMatrix, translate(x, y, z));
+        asteroidModelViewMatrix = mult(asteroidModelViewMatrix, scale(asteroid.radius, asteroid.radius, asteroid.radius));
+    
+        gl.uniform4fv(gl.getUniformLocation(program, "uMaterialColor"), flatten(vec4(asteroid.color)));
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(asteroidModelViewMatrix));
+    
+        gl.drawArrays(gl.TRIANGLES, 0, positionsArray.length);
+    });
+
     orbitAngle += 0.01 * overallSpeed;
     requestAnimationFrame(render);
 }
@@ -255,7 +286,6 @@ function reset() {
     document.getElementById('camera-sliderZ').value = 0;
     document.getElementById('zoom-slider').value = 1;
 }
-
 
 function resume() {
     if (overallSpeed !== 0) {
