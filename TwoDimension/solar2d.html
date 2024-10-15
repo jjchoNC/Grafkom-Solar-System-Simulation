@@ -107,6 +107,35 @@
     <div style="margin-left: 240px;">
         <canvas id="canvas"></canvas>
 
+        <!-- Add Asteroid Belt Modal -->
+        <div class="modal fade" id="addAsteroidBeltModal" tabindex="-1" aria-labelledby="addAsteroidBeltModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addAsteroidBeltModalLabel">Add Asteroid Belt</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="asteroidBeltForm">
+                            <div class="mb-3">
+                                <label for="numAsteroids" class="form-label">Number of Asteroids:</label>
+                                <input type="number" id="numAsteroids" class="form-control" placeholder="Enter number of asteroids" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="minRadius" class="form-label">Minimum Orbit Radius:</label>
+                                <input type="number" id="minRadius" class="form-control" placeholder="Enter minimum orbit radius" step="0.1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maxRadius" class="form-label">Maximum Orbit Radius:</label>
+                                <input type="number" id="maxRadius" class="form-control" placeholder="Enter maximum orbit radius" step="0.1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Add Asteroid Belt</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Add Planet Form -->
         <div class="modal fade" id="addPlanetModal" tabindex="-1" aria-labelledby="addPlanetModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -203,6 +232,16 @@
                                 <i class="fas fa-trash"></i> Delete Planet
                             </button>
                         </div>
+                        <div class="col-sm-6 mb-3">
+                            <button id="addAsteroidBeltButton" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addAsteroidBeltModal">
+                                <i class="fas fa-plus-circle"></i> Add Asteroid Belt
+                            </button>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <button id="deleteAsteroidBelt" class="btn btn-danger w-100">
+                                <i class="fas fa-trash"></i> Delete Asteroid Belt
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -279,6 +318,29 @@
             $('#deletePlanetModal').modal('hide');
         });
         
+
+        document.getElementById('asteroidBeltForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get input values
+            const numAsteroids = parseInt(document.getElementById('numAsteroids').value);
+            const minRadius = parseFloat(document.getElementById('minRadius').value);
+            const maxRadius = parseFloat(document.getElementById('maxRadius').value);
+
+            // Call addAsteroidBelt function with input values
+            createAsteroidBelt(numAsteroids, minRadius, maxRadius);
+
+            // Close modal after adding asteroid belt
+            const addAsteroidBeltModal = new bootstrap.Modal(document.getElementById('addAsteroidBeltModal'));
+            addAsteroidBeltModal.hide();
+
+            // Reset form
+            event.target.reset();
+        });
+
+        document.getElementById('deleteAsteroidBelt').addEventListener('click', function() {
+            deleteAsteroidBelt();
+        });
     </script>
 </body>
 

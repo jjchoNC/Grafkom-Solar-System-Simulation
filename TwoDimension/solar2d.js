@@ -94,6 +94,51 @@ function drawPlanet(planet, angle) {
     return { x: canvasX, y: canvasY };
 }
 
+const asteroidBelt = [];
+
+function createAsteroidBelt(numAsteroids, minRadius, maxRadius) {
+    for (let i = 0; i < numAsteroids; i++) {
+        const orbitRadius = Math.random() * (maxRadius - minRadius) + minRadius;
+        const angle = Math.random() * 2 * Math.PI;
+        asteroidBelt.push({ orbitRadius, angle, radius: 0.005 });
+    }
+}
+
+function deleteAsteroidBelt() {
+    asteroidBelt.length = 0; // Menghapus semua asteroid dalam sabuk
+    console.log("Asteroid belt deleted.");
+}
+
+function drawAsteroids() {
+    asteroidBelt.forEach((asteroid) => {
+        asteroid.angle += 0.001 * overallSpeed;
+        const x = Math.cos(asteroid.angle) * asteroid.orbitRadius;
+        const y = Math.sin(asteroid.angle) * asteroid.orbitRadius;
+
+        const numSegments = 20;
+        const circleVertices = [];
+        const radius = asteroid.radius;
+        circleVertices.push(x, y);
+
+        for (let i = 0; i <= numSegments; i++) {
+            const theta = (i / numSegments) * 2 * Math.PI;
+            const circleX = x + Math.cos(theta) * radius;
+            const circleY = y + Math.sin(theta) * radius;
+            circleVertices.push(circleX, circleY);
+        }
+
+        const verticesArray = new Float32Array(circleVertices);
+        gl.bufferData(gl.ARRAY_BUFFER, verticesArray, gl.STATIC_DRAW);
+
+        const colorLocation = gl.getUniformLocation(gl.getParameter(gl.CURRENT_PROGRAM), 'u_Color');
+        gl.uniform4fv(colorLocation, new Float32Array([0.5, 0.5, 0.5, 1.0]));
+
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, numSegments + 2);
+    });
+}
+
+// createAsteroidBelt(100, 0.75, 1.0);
+
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -113,6 +158,8 @@ function render() {
         planet.currentPosition = { x: position.x, y: position.y };
         drawOrbit(planet.orbitRadius);
     });
+
+    drawAsteroids();
 
     time += 0.01 * overallSpeed;
     requestAnimationFrame(render);
@@ -180,7 +227,6 @@ function pause() {
     overallSpeed = 0;
     speedControl.value = 0;
 }
-
 
 function resume() {
     if (overallSpeed !== 0) {
