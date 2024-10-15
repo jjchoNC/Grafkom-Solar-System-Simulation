@@ -180,6 +180,19 @@ function resume() {
     speedControl.value = overallSpeed;
 }
 
+function reset() {
+    time = 0;
+    overallSpeed = 1.0;
+    speedControl.value = overallSpeed;
+    overallSpeedTmp = overallSpeed;
+    zoom = 1.0;
+    zoomControl.value = zoom;
+    planetPositions.forEach(planet => {
+        planet.currentPosition = { x: 0, y: 0 };
+    });
+    render();
+}
+
 function resizeCanvas() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
