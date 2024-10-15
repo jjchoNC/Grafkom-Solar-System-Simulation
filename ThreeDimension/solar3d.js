@@ -34,18 +34,19 @@ const speedControl = document.getElementById('speed');
 let overallSpeed = parseFloat(speedControl.value);
 let overallSpeedTmp = parseFloat(speedControl.value);;
 
-    const solarPlanet = [
-        { name: 'Sun', radius: 0.06, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
-        { name: 'Mercury', radius: 0.02, orbitRadius: 0.1, speed: 0.57, color: [0.7, 0.7, 0.7, 1.0] },
-        { name: 'Venus', radius: 0.03, orbitRadius: 0.175, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
-        { name: 'Earth', radius: 0.04, orbitRadius: 0.25, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
-        { name: 'Mars', radius: 0.03, orbitRadius: 0.32, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] },
-    ];
+const solarPlanet = [
+    { name: 'Sun', radius: 0.06, orbitRadius: 0, speed: 0, color: [1.0, 1.0, 0.0, 1.0] },
+    { name: 'Mercury', radius: 0.02, orbitRadius: 0.1, speed: 0.57, color: [0.7, 0.7, 0.7, 1.0] },
+    { name: 'Venus', radius: 0.03, orbitRadius: 0.175, speed: 0.365, color: [1.0, 0.9, 0.0, 1.0] },
+    { name: 'Earth', radius: 0.04, orbitRadius: 0.25, speed: 0.265, color: [0.0, 0.5, 1.0, 1.0] },
+    { name: 'Mars', radius: 0.03, orbitRadius: 0.32, speed: 0.187, color: [1.0, 0.3, 0.3, 1.0] },
+];
 
 var devicePixelRatio = window.devicePixelRatio || 1;
-var cameraX = 0;  // Initial X-axis position for the camera
-var cameraY = 0.1;  // Initial Y-axis position for the camera
-var eye = vec3(cameraX, cameraY, 1.0);
+var cameraX = 0;
+var cameraY = 0.1;
+var cameraZ = 1.0;
+var eye = vec3(cameraX, cameraY, cameraZ);
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
@@ -150,7 +151,7 @@ function render() {
     var aspect = canvas.width / canvas.height;
     var projectionMatrix = ortho(-0.25 * aspect * (1 / zoom), 0.25 * aspect * (1 / zoom), -0.25 * (1 / zoom), 0.25 * (1 / zoom), -100, 100);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uProjectionMatrix"), false, flatten(projectionMatrix));
-    var modelViewMatrix = lookAt(vec3(cameraX, cameraY, 1.0), at, up);
+    var modelViewMatrix = lookAt(vec3(cameraX, cameraY, cameraZ), at, up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "uModelViewMatrix"), false, flatten(modelViewMatrix));
 
     // draw path
@@ -208,6 +209,10 @@ document.getElementById('camera-sliderY').addEventListener('input', (event) => {
     cameraY = parseFloat(event.target.value);
 });
 
+document.getElementById('camera-sliderZ').addEventListener('input', (event) => {
+    cameraZ = parseFloat(event.target.value);
+});
+
 document.getElementById('zoom-slider').addEventListener('input', (event) => {
     zoom = parseFloat(event.target.value);
 });
@@ -243,9 +248,11 @@ function reset() {
     orbitAngle = 0;
     cameraX = 0;
     cameraY = 0;
+    cameraZ = 0;
     zoom = 1;
     document.getElementById('camera-slider').value = 0;
     document.getElementById('camera-sliderY').value = 0;
+    document.getElementById('camera-sliderZ').value = 0;
     document.getElementById('zoom-slider').value = 1;
 }
 
@@ -270,45 +277,68 @@ speedControl.addEventListener('input', (event) => {
     overallSpeed = parseFloat(event.target.value);
 });
 
-document.getElementById('planet-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const planetName = document.getElementById('planet-name').value;
-    const planetRadius = parseFloat(document.getElementById('planet-radius').value);
-    const orbitRadius = parseFloat(document.getElementById('planet-orbit-radius').value);
-    const planetSpeed = parseFloat(document.getElementById('planet-speed').value);
-
-    if (!planetName || isNaN(planetRadius) || isNaN(orbitRadius) || isNaN(planetSpeed)) {
-        alert("Please enter valid planet details.");
-        return;
-    }
-
-    let maxPlanetRadius = -1;
-    let indexMaxPlanetRadius = -1;
-
-    for (let i = 0; i < solarPlanet.length; i++) {
-        if (solarPlanet[i].radius > maxPlanetRadius) {
-            maxPlanetRadius = solarPlanet[i].radius;
-            indexMaxPlanetRadius = i;
-        }
-    }
-
-    if (planetRadius + orbitRadius < maxPlanetRadius + solarPlanet[indexMaxPlanetRadius].orbitRadius) {
-        alert("The new planet will collide with the existing planet. Please enter valid planet details.");
-        return;
-    }
-
-    solarPlanet.push({
-        name: planetName,
-        radius: planetRadius,
+function addPlanet(name, radius, orbitRadius, speed, color) {
+    const newPlanet = {
+        name: name,
+        radius: radius,
         orbitRadius: orbitRadius,
-        speed: planetSpeed,
-        color: [Math.random(), Math.random(), Math.random(), 1.0]
-    });
+        speed: speed,
+        color: color,
+        currentPosition: { x: 0, y: 0 }
+    };
 
-    document.getElementById('planet-form').reset();
-    render();
-});
+    solarPlanet.push(newPlanet);
+}
+
+function deletePlanet(name) {
+    const planetIndex = solarPlanet.findIndex(planet => planet.name === name);
+    if (planetIndex !== -1) {
+        solarPlanet.splice(planetIndex, 1);
+        console.log(`${name} has been removed.`);
+    } else {
+        console.log(`${name} not found.`);
+    }
+}
+
+// document.getElementById('planet-form').addEventListener('submit', function (event) {
+//     event.preventDefault();
+
+//     const planetName = document.getElementById('planet-name').value;
+//     const planetRadius = parseFloat(document.getElementById('planet-radius').value);
+//     const orbitRadius = parseFloat(document.getElementById('planet-orbit-radius').value);
+//     const planetSpeed = parseFloat(document.getElementById('planet-speed').value);
+
+//     if (!planetName || isNaN(planetRadius) || isNaN(orbitRadius) || isNaN(planetSpeed)) {
+//         alert("Please enter valid planet details.");
+//         return;
+//     }
+
+//     let maxPlanetRadius = -1;
+//     let indexMaxPlanetRadius = -1;
+
+//     for (let i = 0; i < solarPlanet.length; i++) {
+//         if (solarPlanet[i].radius > maxPlanetRadius) {
+//             maxPlanetRadius = solarPlanet[i].radius;
+//             indexMaxPlanetRadius = i;
+//         }
+//     }
+
+//     if (planetRadius + orbitRadius < maxPlanetRadius + solarPlanet[indexMaxPlanetRadius].orbitRadius) {
+//         alert("The new planet will collide with the existing planet. Please enter valid planet details.");
+//         return;
+//     }
+
+//     solarPlanet.push({
+//         name: planetName,
+//         radius: planetRadius,
+//         orbitRadius: orbitRadius,
+//         speed: planetSpeed,
+//         color: [Math.random(), Math.random(), Math.random(), 1.0]
+//     });
+
+//     document.getElementById('planet-form').reset();
+//     render();
+// });
 
 init();
 updateLighting();

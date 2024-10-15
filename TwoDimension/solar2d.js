@@ -47,10 +47,20 @@ function addPlanet(name, radius, orbitRadius, speed, color) {
         orbitRadius: orbitRadius,
         speed: speed,
         color: color,
-        currentPosition: { x: 0, y: 0 }  // Initial position
+        currentPosition: { x: 0, y: 0 }
     };
 
     planetPositions.push(newPlanet);
+}
+
+function deletePlanet(name) {
+    const planetIndex = planetPositions.findIndex(planet => planet.name === name);
+    if (planetIndex !== -1) {
+        planetPositions.splice(planetIndex, 1);
+        console.log(`${name} has been removed.`);
+    } else {
+        console.log(`${name} not found.`);
+    }
 }
 
 function drawPlanet(planet, angle) {

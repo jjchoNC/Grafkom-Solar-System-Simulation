@@ -107,7 +107,7 @@
     <div style="margin-left: 240px;">
         <canvas id="canvas"></canvas>
 
-        <!-- Bootstrap Modal for Add Planet Form -->
+        <!-- Add Planet Form -->
         <div class="modal fade" id="addPlanetModal" tabindex="-1" aria-labelledby="addPlanetModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content bg-dark text-white">
@@ -140,6 +140,27 @@
             </div>
         </div>
 
+        <!-- Delete Planet Modal -->
+        <div class="modal fade" id="deletePlanetModal" tabindex="-1" aria-labelledby="deletePlanetModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deletePlanetModalLabel">Delete Planet</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="planetNames" class="form-control" placeholder="Enter planet name to delete">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Controls for interaction -->
         <div class="container mt-4" id="controls">
             <div class="controls row text-center justify-content-center py-3 bg-dark text-white rounded">
@@ -154,14 +175,6 @@
                     <label for="zoom" class="form-label">Zoom:</label>
                     <input type="range" id="zoom" name="zoom" min="0.5" max="1.5" step="0.1" value="1" class="form-range">
                 </div>
-
-                <!-- Play/Pause Buttons -->
-                <!-- <div class="col-sm-4 mb-3">
-                    <button id="pause" onclick="pause();" class="btn btn-primary me-2">Pause</button>
-                    <button id="play" onclick="resume();" class="btn btn-success">Play</button>
-                    <button id="reset" onclick="reset();" class="btn btn-success">Reset</button>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlanetModal">Add Planet</button>
-                </div> -->
                  
                 <div class="container">
                     <div class="row">
@@ -183,6 +196,11 @@
                         <div class="col-sm-6 mb-3">
                             <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#addPlanetModal">
                                 <i class="fas fa-plus-circle"></i> Add Planet
+                            </button>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deletePlanetModal">
+                                <i class="fas fa-trash"></i> Delete Planet
                             </button>
                         </div>
                     </div>
@@ -252,6 +270,15 @@
             const b = Math.random();
             return [r, g, b, 1.0];  // Return random [r, g, b, 1.0] array
         }
+
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            const planetNames = document.getElementById('planetNames').value;
+            console.log(planetNames);
+            deletePlanet(planetNames);
+            document.getElementById('planetNames').value = '';
+            $('#deletePlanetModal').modal('hide');
+        });
+        
     </script>
 </body>
 

@@ -7,6 +7,7 @@
     <title>Solar System 3D</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <style>
         body, html {
@@ -138,17 +139,71 @@
         
         <canvas id="gl-canvas"></canvas>
 
+        <!-- Add Planet Form -->
+        <div class="modal fade" id="addPlanetModal" tabindex="-1" aria-labelledby="addPlanetModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPlanetModalLabel">Add New Planet</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="planetForm">
+                            <div class="mb-3">
+                                <label for="planetName" class="form-label">Planet Name:</label>
+                                <input type="text" id="planetName" class="form-control" placeholder="Enter planet name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="planetRadius" class="form-label">Radius:</label>
+                                <input type="number" id="planetRadius" class="form-control" placeholder="Enter planet radius" step="0.01" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="planetOrbitRadius" class="form-label">Orbit Radius:</label>
+                                <input type="number" id="planetOrbitRadius" class="form-control" placeholder="Enter orbit radius" step="0.1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="planetSpeed" class="form-label">Speed:</label>
+                                <input type="number" id="planetSpeed" class="form-control" placeholder="Enter planet speed" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Add Planet</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Planet Modal -->
+        <div class="modal fade" id="deletePlanetModal" tabindex="-1" aria-labelledby="deletePlanetModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deletePlanetModalLabel">Delete Planet</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="planetNames" class="form-control" placeholder="Enter planet name to delete">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>        
+
         <div class="container mt-4" id="controls">
             <div class="controls row text-center justify-content-center py-3 bg-dark text-white rounded">
 
                 <!-- Planet Speed Slider -->
-                <div class="col-sm-4 mb-3">
+                <div class="col-sm-6 mb-3">
                     <label for="speed" class="form-label">Planet Speed:</label>
                     <input type="range" id="speed" name="speed" min="1" max="5" step="0.2" value="1" class="form-range">
                 </div>
 
                 <!-- Zoom Slider -->
-                <div class="col-sm-4 mb-3">
+                <div class="col-sm-6 mb-3">
                     <label for="zoom-slider" class="form-label">Zoom:</label>
                     <input type="range" id="zoom-slider" min="1" max="2" step="0.001" value="1" class="form-range">
                 </div>
@@ -163,6 +218,12 @@
                 <div class="col-sm-4 mb-3">
                     <label for="camera-sliderY" class="form-label">Camera-Y:</label>
                     <input type="range" id="camera-sliderY" min="-0.5" max="0.5" step="0.01" value="0.25" class="form-range">
+                </div>
+
+                <!-- Camera-Z Slider -->
+                <div class="col-sm-4 mb-3">
+                    <label for="camera-sliderZ" class="form-label">Camera-Z:</label>
+                    <input type="range" id="camera-sliderZ" min="-2" max="2" step="0.01" value="0.25" class="form-range">
                 </div>
 
                 <!-- Light-X Slider -->
@@ -183,34 +244,34 @@
                     <input type="range" id="light-sliderZ" min="0" max="1" step="0.1" value="0.1" class="form-range">
                 </div>
 
-                <!-- Play/Pause Buttons -->
-                <div class="col-sm-4 mb-3">
-                    <button id="pause" onclick="pause();" class="btn btn-primary me-2">Pause</button>
-                    <button id="play" onclick="resume();" class="btn btn-success">Play</button>
-                    <button id="reset" onclick="reset();" class="btn btn-warning">Reset</button>
-                </div>
-
-                <!-- Planet Addition Form -->
-                <div class="col-sm-12">
-                    <form id="planet-form" class="mt-3">
-                        <div class="mb-3">
-                            <label for="planet-name" class="form-label">Planet Name:</label>
-                            <input type="text" id="planet-name" name="planet-name" required class="form-control">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <button id="pause" onclick="pause();" class="btn btn-primary w-100">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label for="planet-radius" class="form-label">Planet Radius:</label>
-                            <input type="number" id="planet-radius" name="planet-radius" step="0.01" min="0.01" required class="form-control">
+                        <div class="col-sm-6 mb-3">
+                            <button id="play" onclick="resume();" class="btn btn-success w-100">
+                                <i class="fas fa-play"></i> Play
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label for="planet-orbit-radius" class="form-label">Orbit Radius:</label>
-                            <input type="number" id="planet-orbit-radius" name="planet-orbit-radius" step="0.01" min="0.01" required class="form-control">
+                        <div class="col-sm-6 mb-3">
+                            <button id="reset" onclick="reset();" class="btn btn-warning w-100">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label for="planet-speed" class="form-label">Planet Speed:</label>
-                            <input type="number" id="planet-speed" name="planet-speed" step="0.01" min="0.01" required class="form-control">
+                        <div class="col-sm-6 mb-3">
+                            <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#addPlanetModal">
+                                <i class="fas fa-plus-circle"></i> Add Planet
+                            </button>
                         </div>
-                        <button type="submit" class="btn btn-info">Add Planet</button>
-                    </form>
+                        <div class="col-sm-6 mb-3">
+                            <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deletePlanetModal">
+                                <i class="fas fa-trash"></i> Delete Planet
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -287,6 +348,47 @@
         function redirectTo2D() {
             window.location.href = "../TwoDimension/solar2d.html";
         }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.getElementById('planetForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get input values
+            const name = document.getElementById('planetName').value;
+            const radius = parseFloat(document.getElementById('planetRadius').value);
+            const orbitRadius = parseFloat(document.getElementById('planetOrbitRadius').value);
+            const speed = parseFloat(document.getElementById('planetSpeed').value);
+            const color = getRandomColor();  // Use random color
+
+            // Call addPlanet function
+            addPlanet(name, radius, orbitRadius, speed, color);
+            
+            // Close modal after adding planet
+            const addPlanetModal = new bootstrap.Modal(document.getElementById('addPlanetModal'));
+            addPlanetModal.hide();
+
+            // Reset form
+            event.target.reset();
+        });
+
+        // Function to generate random color [r, g, b, a]
+        function getRandomColor() {
+            const r = Math.random();
+            const g = Math.random();
+            const b = Math.random();
+            return [r, g, b, 1.0];  // Return random [r, g, b, 1.0] array
+        }
+
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            const planetNames = document.getElementById('planetNames').value;
+            console.log(planetNames);
+            deletePlanet(planetNames);
+            document.getElementById('planetNames').value = '';
+            $('#deletePlanetModal').modal('hide');
+        });
+        
     </script>
 </body>
 
